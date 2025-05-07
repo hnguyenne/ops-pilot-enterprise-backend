@@ -6,7 +6,8 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  output   = "../src/generated/client"
 }
 
 datasource db {
@@ -41,6 +42,7 @@ model Organization {
 model User {
   id Int @id @default(autoincrement())
   email String @unique
+  password String // hashed password
   role Role @default(EMPLOYEE)
   organization Organization @relation(fields: [organizationId], references: [id])
   organizationId Int
