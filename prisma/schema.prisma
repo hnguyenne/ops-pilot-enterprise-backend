@@ -7,7 +7,6 @@
 generator client {
   provider = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
-  output   = "../src/generated/client"
 }
 
 datasource db {
@@ -40,9 +39,13 @@ model Organization {
 }
 
 model User {
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
   email String @unique
-  password String // hashed password
+  emailVerified Boolean @default(false)
+  image String?
+  name String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   role Role @default(EMPLOYEE)
   organization Organization @relation(fields: [organizationId], references: [id])
   organizationId Int
@@ -50,6 +53,57 @@ model User {
   TimeLog TimeLog[]
   Project Project[] @relation("ProjectUsers")
   Task Task[]
+  Session Session[]
+  Account Account[]
+}
+
+model Session {
+  id String @unique
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime @updatedAt
+  token String
+  ipAddress String?
+  userAgent String?
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Account {
+    id                   String    @id @default(cuid())
+    userId               String
+    accountId            String
+    providerId           String
+    accessToken          String?
+    refreshToken         String?
+    accessTokenExpiresAt DateTime?
+    refreshTokenExpiresAt DateTime?
+    scope                String?
+    idToken              String?
+    password             String?
+    createdAt            DateTime  @default(now())
+    updatedAt            DateTime  @updatedAt
+    user                 User      @relation(fields: [userId], references: [id])
+
+    @@unique([providerId, accountId])
+    @@index([userId])
+    @@index([accessTokenExpiresAt])
+    @@index([refreshTokenExpiresAt])
+}
+
+model Verification {
+    id          String   @id @default(cuid())
+    identifier  String
+    value       String
+    expiresAt   DateTime
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@unique([identifier, value])
+    @@index([identifier])
+
 }
 
 model Project {
@@ -64,6 +118,7 @@ model Project {
   User User[] @relation("ProjectUsers")
   Task Task[]
   Workflow Workflow[]
+
 }
 
 model Task {
@@ -71,7 +126,7 @@ model Task {
   status Status @default(NOT_STARTED)
   name String
   description String
-  assigneeId Int
+  assigneeId String
   assignee User @relation(fields: [assigneeId], references: [id])
   TimeLog TimeLog[]
   dependencies Task[] @relation("TaskDeps") //Tasks that must be completed before this one
@@ -80,6 +135,11 @@ model Task {
   project Project @relation(fields: [projectId], references: [id])
   workflowId Int
   workflow Workflow @relation(fields: [workflowId], references: [id])
+
+  @@index([projectId])
+  @@index([workflowId])
+  @@index([assigneeId])
+
 }
 
 model Workflow {
@@ -91,25 +151,28 @@ model Workflow {
   Task Task[]
   project Project @relation(fields: [projectId], references: [id])
   projectId Int
+
 }
 
 model AuditLog {
   id Int @id @default(autoincrement())
   user User @relation(fields: [userId], references: [id])
-  userId Int
+  userId String
   action String
   target String
   data String
   timestamp DateTime @default(now())
+
 }
 
 model TimeLog {
   id Int @id @default(autoincrement())
   user User @relation(fields: [userId], references: [id])
-  userId Int
+  userId String
   task Task @relation(fields: [taskId], references: [id])
   taskId Int
   date DateTime @default(now())
   hours Int
+
 }
 
