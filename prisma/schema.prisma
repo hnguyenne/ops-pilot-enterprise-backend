@@ -51,7 +51,8 @@ model User {
   organizationId Int
   AuditLog       AuditLog[]
   TimeLog        TimeLog[]
-  Project        Project[]    @relation("ProjectUsers")
+  projectId      Int?
+  Project        Project?     @relation(fields: [projectId], references: [id])
   Task           Task[]
   Session        Session[]
   Account        Account[]
@@ -121,7 +122,7 @@ model Project {
   status         String
   organization   Organization @relation(fields: [organizationId], references: [id])
   organizationId Int
-  User           User[]       @relation("ProjectUsers")
+  User           User[]
   Task           Task[]
   Workflow       Workflow[]
 }
