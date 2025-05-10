@@ -131,8 +131,7 @@ model Task {
   status       Status    @default(NOT_STARTED)
   name         String
   description  String
-  assigneeId   String
-  assignee     User      @relation(fields: [assigneeId], references: [id])
+  assignees     User[]
   TimeLog      TimeLog[]
   dependencies Task[]    @relation("TaskDeps") //Tasks that must be completed before this one
   dependents   Task[]    @relation("TaskDeps") //Tasks that depend on this one
@@ -143,7 +142,6 @@ model Task {
 
   @@index([projectId])
   @@index([workflowId])
-  @@index([assigneeId])
 }
 
 model Workflow {
