@@ -118,7 +118,7 @@ model Project {
   description    String
   startDate      DateTime
   endDate        DateTime
-  status         String
+  status         Status       @default(NOT_STARTED)
   organization   Organization @relation(fields: [organizationId], references: [id])
   organizationId Int
   User           User[]       @relation("ProjectUsers")

@@ -21,3 +21,19 @@ export const assignRole = async (userId: string, role: Role) => {
     return user;
 }
 
+export async function validateProjectManager(userId: string, organizationId: number): Promise<boolean> {
+    try {
+        const user = await prisma.user.findFirst({
+            where: {
+                id: userId,
+                organizationId: organizationId,
+                role: "PROJECTMANAGER"
+            }
+        });
+        return !!user;
+    } catch (error) {
+        console.error("Error validating project manager:", error);
+        return false;
+    }
+}
+
